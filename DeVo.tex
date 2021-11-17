@@ -34,9 +34,9 @@ We will need to make use of a positive accumulator; this will serve as both a wh
 \subsection{Encryption schemes}
 The encryption schemes used here will be of a threshold type, a brief description of which can be found in the appendix.
 
-There will be two unique private keys, $s_1$ and $s_2$, shared among the MPC committee. These are simple scalar values that will be multiplied by elliptic curve points to shield the elliptic curve values. $s_1P$ and $s_2$P will be public values (scalar values cannot be determined due to the discrete log assumption).
+There will be three unique private keys, $s_1$, $s_2$ and $s_3$, shared among the MPC committee. These 3 secret keys will be used to create 2 public scalar points, $s_1P$ and $s_2P$, and 2 secret keys, $s_2s_3$ and $s_1s_3$ - after this the shards of the original public keys should be erased.
 
-One point to elaborate on is that, if we have some other scalar $r$, we can create both $rs_1P$ and $rs_2P$, but we cannot create $rs_1s_2P$ without using the MPC committee. This will be relevant later, because the committee will generate $rs_1s_2P$, but since no voter can generate it it will be impossible to link tallied votes to the voters who sent them.
+One point to elaborate on is that, if we have some other scalar $r$, we can create both $rs_1P$ and $rs_2P$, but we cannot create $rs_1s_2P$ without using the MPC committee. This will be relevant later, because the committee will generate $rs_1s_2s_3P$, but since no voter can generate it it will be impossible to link tallied votes to the voters who sent them.
 
 \subsection{Vote representation}
 Votes will be determined in a graph theoretic way. Voters will be have some value $g_i$. Voters will send records that are only valid if they 'point' to their own value $g_i$ (by blinding $g_i$ with a random scalar, chosen differently with the creation of each record). 
@@ -70,7 +70,7 @@ We will refer to the thing being created by voters as `nodes`. This terminology 
     \item A message saying this is a vote in vote X.
     \item A proof that they are eligible to vote, and that when they use $g_i$, it is the correct value (i.e. the one in the accumulator associated with their name).
     \item A blinded reference to their unique value, $g_is_1P+r_{i,j}s_1P$.
-    \item A shielded reference to their blinding value, $r_{i,j}s_2P$. The MPC committee will later use this to determine $r_{i,j}s_1s_2P$ and unshield the pointer ($r_{i,j}$ was a randomly generated scalar).
+    \item A shielded reference to their blinding value, $r_{i,j}s_2P$. The MPC committee will later use this to determine $r_{i,j}s_1s_2s_3P$ and unshield the pointer ($r_{i,j}$ was a randomly generated scalar).
 \end{enumerate}
 
 Due to the private nature of the ZEXE design, it will be impossible to see who is sending nodes. However, any voter is free to uncover any of the nodes they wish to a potential briber (by giving them the pre-images of the above items); but voters can show any subset of the tree of nodes they are making, and thus 'prove' they voted however they wish. Hence a 'proof' of how one voted is meaningless.
@@ -80,15 +80,15 @@ When the vote is over, the MPC committee will batch the nodes into small enough 
 
 For each batch, the MPC member will do 3 things (and also produce a proof that these things were all done correctly):
 \begin{enumerate}
-    \item Apply their shard of $s_2$ to $g_is_1P+r_{i,j}s_1P$.
-    \item Apply their shard of $s_1$ to $r_{i,j}s_2P$.
+    \item Apply their shard of $s_2s_3$ to $g_is_1P+r_{i,j}s_1P$.
+    \item Apply their shard of $s_1s_3$ to $r_{i,j}s_2P$.
     \item Permute the batch, so that nobody will be able to see which pre-sharded node corresponds to which post-sharded vote.
 \end{enumerate}
 
 Once the threshold MPC has been conducted, votes will be of the form
-$$ g_is_1s_2P + r_{i,j}s_1s_2P, \hspace{2mm}r_{i,j}s_1s_2P. $$
+$$ g_is_1s_2s_3P + r_{i,j}s_1s_2s_3P, \hspace{2mm}r_{i,j}s_1s_2s_3P. $$
 
-Now we can subtract the two to get out $g_is_1s_2P$. The previous values, $g_is_1P + r_{i,j}s_1P$ were all different, but the returned values from each node are the same if they are from the same voter.
+Now we can subtract the two to get out $g_is_1s_2s_3P$. The previous values, $g_is_1P + r_{i,j}s_1P$ were all different, but the returned values from each node are the same if they are from the same voter.
 
 On the last leg of the MPC, where each committee member applies the final shard, there will be a couple more tasks. Firstly, MPC members will unshield the pointer to see which votes are from the same voter. Secondly, they will run through their batch of revealed votes and remove duplicates without changing the vote (by reducing modulo the number of vote options).
 
@@ -137,8 +137,8 @@ Let's say voters will be producing a
 
 Let's say that there are $b$ batches, each with $d$ nodes. Each MPC member, when conducting their step of the MPC, will need to create a SNARK that proves:
 \begin{itemize}
-    \item They applied their shard of $s_1$ correctly (using the same shard each time)
-    \item They applied their shard of $s_2$ correctly (using the same shard each time)
+    \item They applied their shard of $s_1s_3$ correctly (using the same shard each time)
+    \item They applied their shard of $s_2s_3$ correctly (using the same shard each time)
     \item They permuted their batch of votes
 \end{itemize}
 
