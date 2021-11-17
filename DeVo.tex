@@ -13,7 +13,7 @@
 
 \maketitle
 \section{Abstract}
-This is a decentralised voting system built for secure, privacy-preserving participation amongst multiple anonymous parties. The decentralisation of the tallying procedure is a novel addition to voting infrastructure.
+This is a decentralised voting system built for secure, privacy-preserving participation amongst multiple anonymous parties. The decentralisation of the tallying procedure is a novel addition to voting infrastructure. Of particular interest is that this setup allows the MPC to use a single public key to publish the vote's result, to publish data on the voting chain from another chain using this public key, or publish on another chain using a distributed key. If you want to discuss anything about this design, join the telegram group \href{https://t.me/joinchat/5tZhfUWRwacwNzZk}{here}.
 
 \section{Introduction}
 This design aims to be as safe as MACI (the properties MACI tries to achieve are listed at the end), but make the vote tallying process decentralised. There will still be the organisation the vote is for (henceforth referred to as O), and they have a few roles:
@@ -22,6 +22,8 @@ This design aims to be as safe as MACI (the properties MACI tries to achieve are
     \item Send the voter's 'voting point' $g_i$ (if preferred, voters could choose these points themselves and send them to O)
     \item There will be an initial setup ceremony (an arbitrary number of elections can be held after this), and O may or may not be involved in this
 \end{enumerate}
+
+This infrastructure is paramount to the developing DAO space, and to decentralised governance in general. Aside from the novel addition of a dencentralised tallying mechanism, the design also allows for easy addition of keys on other chains. This will allow the MPC committee to publish things on other chains without a bridge, and also to publish things on the voting chain from other chains (also to publish the result of the vote on chain too)
 
 This works under the paradigm of ZEXE, so the native on-chain transaction is a proof of validity of an off chain computation; all records are private by default. ZEXE is implemented by Aleo, an L1 for privacy centered, scalable applications. The default privacy is essential to this design.
 

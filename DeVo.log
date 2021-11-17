@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2021) (preloaded format=pdflatex 2021.9.15)  17 NOV 2021 11:55
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2021) (preloaded format=pdflatex 2021.9.15)  17 NOV 2021 13:38
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -188,14 +188,14 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <5> on input line 22.
  [1
 
-{/usr/local/texlive/2021/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] [4] [5] [6] [7] [8] [9] (/Users/errol_hava/Documents/TexStudio/DeVo/DeVo.aux)
+{/usr/local/texlive/2021/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] [4] [5] [6] [7] [8] [9] [10] (/Users/errol_hava/Documents/TexStudio/DeVo/DeVo.aux)
 Package rerunfilecheck Info: File `DeVo.out' has not changed.
 (rerunfilecheck)             Checksum: 68F56CADF6E33304B406B7AB4B061159;2566.
  ) 
 Here is how much of TeX's memory you used:
- 7055 strings out of 478994
- 105973 string characters out of 5858184
- 405149 words of memory out of 5000000
+ 7056 strings out of 478994
+ 105980 string characters out of 5858184
+ 405151 words of memory out of 5000000
  24442 multiletter control sequences out of 15000+600000
  408227 words of font info for 43 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -203,10 +203,10 @@ Here is how much of TeX's memory you used:
 pdfTeX warning (dest): name{https://medium.com/privacy-scaling-explorations/release-announcement-maci-1-0-c032bddd2157} has been referenced but does not exist, replaced by a fixed one
 
 {/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}</usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb>
-Output written on /Users/errol_hava/Documents/TexStudio/DeVo/DeVo.pdf (9 pages, 161174 bytes).
+Output written on /Users/errol_hava/Documents/TexStudio/DeVo/DeVo.pdf (10 pages, 162309 bytes).
 PDF statistics:
- 220 PDF objects out of 1000 (max. 8388607)
- 194 compressed objects within 2 object streams
- 50 named destinations out of 1000 (max. 500000)
+ 225 PDF objects out of 1000 (max. 8388607)
+ 198 compressed objects within 2 object streams
+ 51 named destinations out of 1000 (max. 500000)
  169 words of extra memory for PDF output out of 10000 (max. 10000000)
 
