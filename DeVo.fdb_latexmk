@@ -1,7 +1,7 @@
 # Fdb version 3
-["pdflatex"] 1637135529 "/Users/errol_hava/Documents/TexStudio/DeVo/DeVo.tex" "/Users/errol_hava/Documents/TexStudio/DeVo/DeVo.pdf" "DeVo" 1637135762
-  "/Users/errol_hava/Documents/TexStudio/DeVo/DeVo.aux" 1637135529 3123 351ca5cc010a44e2d4c660922b930f05 ""
-  "/Users/errol_hava/Documents/TexStudio/DeVo/DeVo.tex" 1637135528 24153 ab42612f8bd23a7fe4805b88b4d95546 ""
+["pdflatex"] 1637139327 "/Users/errol_hava/Documents/TexStudio/DeVo/DeVo.tex" "/Users/errol_hava/Documents/TexStudio/DeVo/DeVo.pdf" "DeVo" 1637139330
+  "/Users/errol_hava/Documents/TexStudio/DeVo/DeVo.aux" 1637139327 3122 b7c9002356c077226342c826d7ea9d07 ""
+  "/Users/errol_hava/Documents/TexStudio/DeVo/DeVo.tex" 1637139326 23782 3f3b6b0a0782de37b6b726b3e3cf9aaa ""
   "/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2021/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2021/texmf-dist/fonts/tfm/jknappen/ec/tcrm1000.tfm" 1136768653 1536 e07581a4bb3136ece9eeb4c3ffab8233 ""
@@ -70,13 +70,13 @@
   "/usr/local/texlive/2021/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1616695603 5169178 a2ce6e2d73f603b690db6777d06dbccb ""
   "/usr/local/texlive/2021/texmf-var/web2c/pdftex/pdflatex.fmt" 1631718888 2724737 14a405a8a9510799112d4c19654d9000 ""
   "/usr/local/texlive/2021/texmf.cnf" 1616695596 577 4c1911a7228e554c6032256d3cf5567d ""
-  "DeVo.aux" 1637135529 3123 351ca5cc010a44e2d4c660922b930f05 "pdflatex"
-  "DeVo.out" 1637135529 2566 68f56cadf6e33304b406b7ab4b061159 "pdflatex"
-  "DeVo.tex" 1637135528 24153 ab42612f8bd23a7fe4805b88b4d95546 ""
+  "DeVo.aux" 1637139327 3122 b7c9002356c077226342c826d7ea9d07 "pdflatex"
+  "DeVo.out" 1637139327 2566 68f56cadf6e33304b406b7ab4b061159 "pdflatex"
+  "DeVo.tex" 1637139326 23782 3f3b6b0a0782de37b6b726b3e3cf9aaa ""
   (generated)
   "DeVo.aux"
-  "DeVo.pdf"
   "DeVo.log"
-  "/Users/errol_hava/Documents/TexStudio/DeVo/DeVo.pdf"
   "DeVo.out"
+  "DeVo.pdf"
   "/Users/errol_hava/Documents/TexStudio/DeVo/DeVo.log"
+  "/Users/errol_hava/Documents/TexStudio/DeVo/DeVo.pdf"

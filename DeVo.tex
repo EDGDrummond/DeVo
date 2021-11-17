@@ -9,9 +9,6 @@
  Thomas Norton}
 \date{November 2021}
 
-% {Errol Drummond\\ \texttt{Aleo}\\ \and 
-% Luke Pearson\\ \texttt{Polychain Capital}}
-
 \begin{document}
 
 \maketitle
@@ -70,7 +67,7 @@ We will refer to the thing being created by voters as `nodes`. This terminology 
 \begin{enumerate}
     \item A message saying this is a vote in vote X.
     \item A proof that they are eligible to vote, and that when they use $g_i$, it is the correct value (i.e. the one in the accumulator associated with their name).
-    \item A blinded reference to their unique value, $g_iP+r_{i,j}s_1P$.
+    \item A blinded reference to their unique value, $g_is_1P+r_{i,j}s_1P$.
     \item A shielded reference to their blinding value, $r_{i,j}s_2P$. The MPC committee will later use this to determine $r_{i,j}s_1s_2P$ and unshield the pointer ($r_{i,j}$ was a randomly generated scalar).
 \end{enumerate}
 
@@ -81,15 +78,15 @@ When the vote is over, the MPC committee will batch the nodes into small enough 
 
 For each batch, the MPC member will do 3 things (and also produce a proof that these things were all done correctly):
 \begin{enumerate}
-    \item Apply their shard of $s_2$ to $g_iP+r_{i,j}s_1P$.
+    \item Apply their shard of $s_2$ to $g_is_1P+r_{i,j}s_1P$.
     \item Apply their shard of $s_1$ to $r_{i,j}s_2P$.
     \item Permute the batch, so that nobody will be able to see which pre-sharded node corresponds to which post-sharded vote.
 \end{enumerate}
 
 Once the threshold MPC has been conducted, votes will be of the form
-$$ g_is_2P + r_{i,j}s_1s_2P, \hspace{2mm}r_{i,j}s_1s_2P. $$
+$$ g_is_1s_2P + r_{i,j}s_1s_2P, \hspace{2mm}r_{i,j}s_1s_2P. $$
 
-Now we can subtract the two to get out $g_is_2P$. The previous values, $g_iP + r_{i,j}s_1P$ were all different, but the returned values from each node are the same if they are from the same voter.
+Now we can subtract the two to get out $g_is_1s_2P$. The previous values, $g_is_1P + r_{i,j}s_1P$ were all different, but the returned values from each node are the same if they are from the same voter.
 
 On the last leg of the MPC, where each committee member applies the final shard, there will be a couple more tasks. Firstly, MPC members will unshield the pointer to see which votes are from the same voter. Secondly, they will run through their batch of revealed votes and remove duplicates without changing the vote (by reducing modulo the number of vote options).
 
@@ -104,10 +101,6 @@ Note that none of the post-sharded nodes could be calculated by voters themselve
 As mentioned in the prerequisites, we can now tally our vote by determining the valency of the trees in the forest.
 
 \section{Voting system properties}
-- Explore (or leave for the future) the idea of invalidating a valid voting public key through some mechanism (like in MACI). This will probably be largely dependent on how the organisation wishes to use this voting system, and it should be possible to have the organisation have a few choices in this regard.
-- In a similar vein, it is important to consider in more detail how MPC committee members will be selected and the committee updated. It would be unwise to have the organisation create and share the key, but how committee members will be selected is of importance (though fortunately even if they are corrupt the worst case scenario is that they will be able to see how people voted - they will not be able to create votes)
-- Should add the possibility for turning the vote into nothing too (i.e. add an option that is a null vote)
-
 The vote tallying is conducted in a decentralised manner, with no dependency on a trusted central entity for the tallying. There is still the involvement of the organisation to maintain the whitelist and initialise the vote, but this is usually going to be the case in any voting system.
 When I find more time I will try to explain/argue why this mechanism has all of these properties (descriptions of these properties copied from \hyperlink{https://medium.com/privacy-scaling-explorations/release-announcement-maci-1-0-c032bddd2157}{this} MACI blog post).
 \begin{itemize}
@@ -126,7 +119,7 @@ In its traditional form, collusion resistance means that voters are unable to pr
 
 We take a different approach to collusion resistance: rather than preventing voters from revealing their true vote, we provide them with the means to reveal \emph{any} vote.  By analogy to traditional polling locations, our system is akin to one in which voters leave the booth with receipts stating that they voted for each of the candidates.  The voter can then present the appropriate receipt to the corrupt third party and collect the bribe regardless of the actual vote they cast.  Of course, because it is common knowledge that voters have the means to prove any outcome they wish, the proof becomes meaningless and third parties do not try to bribe voters to begin with.  
 
-This plays out in our system as follows: suppose that in a vote between $N$ candidates $C_0, C_1, \ldots C_{N-1}$ Alice wishes to vote for candidate $C_k$.  Recall that in the final tally, all of Alice's ballots will be counted and their number modulo $N$ will determine which candidate receives Alice's vote. So Alice could vote for $C_k$ simply by submitting $k$ ballots.  Now suppose that Alice has received an offer from Bob: 1 BTC if she votes for candidate $C_0$. Alice wishes to collect the 1 BTC from Bob and still vote for $C_k$ as she originally intended. Rather than submitting $k$ ballots, Alice submits $N+k$ ballots (or $2N+k$, or $3N+k$, etc.).  Each of Alice's ballots has the form $(g_A P + r_{A,j} s_1 P, r_{A,j} s_2 P)$ for $j=1,2, \ldots N+k$. Bob sees all ballots cast by all voters, but due to their shielded form he cannot identify Alice's votes from among them.  Alice may, however, reveal any of her ballots to Bob by sharing with him the randomly generated number $r_{A,j}$ with which she shielded the ballot.  Bob then computes $r_{A,j} s_2 P$ and is convinced that Alice did indeed cast the given ballot because otherwise she would have had to solve a discrete logarithm problem to determine $r_{A,j}$ from the publicly visible EC point $r_{A,j}s_2 P$.  Bob now computes $r_{A,j} s_1 P$ and subtracts it from $g_A P + r_{A,j} s_1 P$ to see the curve point $g_A P$.  If Alice reveals multiple votes to Bob, all will contain the same point $g_A P$, further convincing Bob that Alice has honestly revealed her votes to him.  
+This plays out in our system as follows: suppose that in a vote between $N$ candidates $C_0, C_1, \ldots C_{N-1}$ Alice wishes to vote for candidate $C_k$.  Recall that in the final tally, all of Alice's ballots will be counted and their number modulo $N$ will determine which candidate receives Alice's vote. So Alice could vote for $C_k$ simply by submitting $k$ ballots.  Now suppose that Alice has received an offer from Bob: 1 BTC if she votes for candidate $C_0$. Alice wishes to collect the 1 BTC from Bob and still vote for $C_k$ as she originally intended. Rather than submitting $k$ ballots, Alice submits $N+k$ ballots (or $2N+k$, or $3N+k$, etc.).  Each of Alice's ballots has the form $(g_A s_1 P + r_{A,j} s_1 P, r_{A,j} s_2 P)$ for $j=1,2, \ldots N+k$. Bob sees all ballots cast by all voters, but due to their shielded form he cannot identify Alice's votes from among them.  Alice may, however, reveal any of her ballots to Bob by sharing with him the randomly generated number $r_{A,j}$ with which she shielded the ballot.  Bob then computes $r_{A,j} s_2 P$ and is convinced that Alice did indeed cast the given ballot because otherwise she would have had to solve a discrete logarithm problem to determine $r_{A,j}$ from the publicly visible EC point $r_{A,j}s_2 P$.  Bob now computes $r_{A,j} s_1 P$ and subtracts it from $g_A s_1 P + r_{A,j} s_1 P$ to see the curve point $g_A s_1 P$.  If Alice reveals multiple votes to Bob, all will contain the same point $g_A s_1 P$, further convincing Bob that Alice has honestly revealed her votes to him.  
 
 The crucial observation is that Alice may reveal \emph{as many of her votes} to Bob as she wishes, but he will have no way of knowing whether she has revealed \emph{all of her votes.}  So to prove to Bob that she voted for candidate $C_0$, Alice reveals $N$ of her ballots, leaving the remaining $k$ ballots shielded.  The DLP makes it impractical for Bob to try to unshield other ballots to see whether Alice left any hidden from him.  Bob realizes the futility of trying to bribe Alice and so he never tries in the first place.
 
@@ -175,6 +168,8 @@ There are a few things in this that require more thought/work. Ideas from anybod
     \item A projection on how long the MPC (vote tallying would take)
     \item Which accumulator schemes would make sense to use with this system
     \item Discussion of the issue of selling a private key. Perhaps there is a way to remove the possibility of determining a vote even with the private key; maybe this could be done via nullifiers and sending records to the vote tallying public key?
+    \item It is important to consider in more detail how MPC committee members will be selected and the committee updated. It would be unwise to have the organisation create and share the key, but how committee members will be selected is of importance (though fortunately even if they are corrupt the worst case scenario is that they will be able to see how people voted - they will not be able to create votes)
+    \item Should add the possibility for turning the vote into nothing too (i.e. add an option that is a null vote)
 \end{enumerate}
 
 \section{Potential problems}
