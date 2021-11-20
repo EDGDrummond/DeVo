@@ -1,0 +1,9 @@
+\begin{tikzpicture}
+    [roundnode/.style={circle, draw=black, very thick},
+    squarednode/.style={rectangle, draw=black, very thick},]
+
+    %Nodes
+    \node[squarednode](Q){Q};        
+    \node[squarednode](R)[below=1cm of Q]{R};
+    \node[squarednode] (S)[right=1cm of {$(Q)!0.5!(R)$}] {S}; 
+\end{tikzpicture}

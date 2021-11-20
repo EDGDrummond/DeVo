@@ -2,8 +2,11 @@
 \usepackage[utf8]{inputenc}
 \usepackage{hyperref}
 \usepackage{url}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{positioning, calc, arrows.meta}
 
-\title{DeVo: Decentralised Voting}
+\title{Decentralised Voting}
 \author{Errol Drummond\\ \texttt{Aleo, Dock}\\ \and 
  Luke Pearson\\ \texttt{Polychain Capital} \and
  Thomas Norton}
@@ -65,7 +68,7 @@ When sending records, voters will prove both that they are eligible to vote, and
 When publishing this accumulator, O will also send a record to each eligible voter that contains their $g_i$ value (essentially encrypted communication).
 
 \subsection{Voting}
-We will refer to the thing being created by voters as `nodes`. This terminology is used because we can think of the voters as building a star shaped tree. In the center of the tree will be the voter's scalar $g_i$, and the voter adds nodes that `point` to the center. In these nodes (which are published as records in the ZEXE model), the voter has to input several things:
+We will refer to the thing being created by voters as `nodes`. This terminology is used because we can think of the voters as building a star shaped tree. In the center of the tree will be the voter's scalar $g_i$, and the voter adds nodes that `point` to the center - you can see this more clearly in figure \ref{fig:figure1}. In these nodes (which are published as records in the ZEXE model), the voter has to input several things:
 \begin{enumerate}
     \item A message saying this is a vote in vote X.
     \item A proof that they are eligible to vote, and that when they use $g_i$, it is the correct value (i.e. the one in the accumulator associated with their name).
@@ -73,26 +76,68 @@ We will refer to the thing being created by voters as `nodes`. This terminology 
     \item A shielded reference to their blinding value, $r_{i,j}s_2P$. The MPC committee will later use this to determine $r_{i,j}s_1s_2s_3P$ and unshield the pointer ($r_{i,j}$ was a randomly generated scalar).
 \end{enumerate}
 
-Due to the private nature of the ZEXE design, it will be impossible to see who is sending nodes. However, any voter is free to uncover any of the nodes they wish to a potential briber (by giving them the pre-images of the above items); but voters can show any subset of the tree of nodes they are making, and thus 'prove' they voted however they wish. Hence a 'proof' of how one voted is meaningless.
+\begin{figure}[h!]
+        \centering
+        \input{Figures/figure1}
+        \caption{A representation of the voting trees being constructed, though the connections between the nodes cannot be seen on chain.}
+        \label{fig:figure1}
+\end{figure}
+
+\begin{figure}[h!]
+        \centering
+        \input{Figures/figure2}
+        \caption{This is what observers actually see during the vote; they only see that nodes are being added, not any of the edges connecting nodes. These 3 nodes could all be from separate voters, or they could all be from the same voter - there is nothing we can realistically do to know.}
+        \label{fig:figure2}
+\end{figure}
+
+Due to the private nature of the ZEXE design, it will be impossible to see who is sending nodes - figure \ref{fig:figure2} represents what is actually visible to a general observer. However, any voter is free to uncover any of the nodes they wish to a potential briber (by giving them the pre-images of the above items); but voters can show any subset of the tree of nodes they are making, and thus 'prove' they voted however they wish. Hence a 'proof' of how one voted is meaningless.
 
 \subsection{Vote tallying}
 When the vote is over, the MPC committee will batch the nodes into small enough batches such that it will be computationally feasible to conduct the MPC.
 
-For each batch, the MPC member will do 3 things (and also produce a proof that these things were all done correctly):
+For each batch, the MPC member will do 3 things (and also produce a proof that these things were all done correctly). The MPC member will do something locally to each node, and they will also do something globally to the set of nodes in their batch - you can look at figure \ref{fig:figure3} for a visual of the local change, and at figure \ref{fig:figure4} for a visual of the global change:
 \begin{enumerate}
-    \item Apply their shard of $s_2s_3$ to $g_is_1P+r_{i,j}s_1P$.
-    \item Apply their shard of $s_1s_3$ to $r_{i,j}s_2P$.
+    \item Apply their shard ($s_{2,k}s_{3,k}$) of $s_2s_3$ to $g_is_1P+r_{i,j}s_1P$.
+    \item Apply their shard ($s_{1,k}s_{3,k}$) of $s_1s_3$ to $r_{i,j}s_2P$.
+    \begin{figure}[h!]
+        \centering
+        \input{Figures/figure3}
+        \caption{The MPC member will apply their shard $s_{2,k}s_{3,k}$ to the node being added, and their other shard $s_{1,k}s_{3,k}$ to the shielded blinding factor.}
+        \label{fig:figure3}
+    \end{figure}
     \item Permute the batch, so that nobody will be able to see which pre-sharded node corresponds to which post-sharded vote.
 \end{enumerate}
+
+
+\begin{figure}[h!]
+        \centering
+        \input{Figures/figure4}
+        \caption{Voting pairs (the node being added, and the shielded blinding factor) will be permuted, so that only the MPC member will know which post sharded node corresponds to which pre-sharded node.}
+        \label{fig:figure4}
+\end{figure}
 
 Once the threshold MPC has been conducted, votes will be of the form
 $$ g_is_1s_2s_3P + r_{i,j}s_1s_2s_3P, \hspace{2mm}r_{i,j}s_1s_2s_3P. $$
 
-Now we can subtract the two to get out $g_is_1s_2s_3P$. The previous values, $g_is_1P + r_{i,j}s_1P$ were all different, but the returned values from each node are the same if they are from the same voter.
+Now we can subtract the two to get out $g_is_1s_2s_3P$. The previous values, $g_is_1P + r_{i,j}s_1P$ were all different, but the returned values from each node are the same if they are from the same voter. Figure \ref{fig:figure5} provides a visual of what will be visible to an MPC member when contributing their final shard, as they will be the ones to uncover nodes from the same voter in their batch.
+
+\begin{figure}[h!]
+        \centering
+        \input{Figures/figure5}
+        \caption{This represents what is visible to an MPC member when they apply the final shard; they uncover which nodes in their batch are from the same voter.}
+        \label{fig:figure5}
+\end{figure}
 
 On the last leg of the MPC, where each committee member applies the final shard, there will be a couple more tasks. Firstly, MPC members will unshield the pointer to see which votes are from the same voter. Secondly, they will run through their batch of revealed votes and remove duplicates without changing the vote (by reducing modulo the number of vote options).
 
-For example, if there are 2 vote options, then if a vote subtree that they see has 5 votes, they will remove 4 of them and reveal 1. If there are 4 votes, they will remove 2 of them (we cannot reduce to 0 as that might remove the vote - the vote organiser will be free to decide if there is a null vote option). This way, the voter's choice is not changed, but the post-MPC trees will not be the same size as the pre-MPC trees, and this is a factor that helps prevent bribery and collusion.
+For example, if there are 2 vote options, then if a vote subtree that they see has 5 votes, they will remove 4 of them and reveal 1. If there are 4 votes, they will remove 2 of them (we cannot reduce to 0 as that might remove the vote - the vote organiser will be free to decide if there is a null vote option). This way, the voter's choice is not changed, but the post-MPC trees will not be the same size as the pre-MPC trees, and this is a factor that helps prevent bribery and collusion. Figure \ref{fig:figure6} provides a visual of what will be visible to observers of the proof produced by an MPC member when the MPC member is the last contributor in the MPC to a batch.
+
+\begin{figure}[h!]
+        \centering
+        \input{Figures/figure6}
+        \caption{This represents what is visible to observers of the proof of the final MPC member on a batch. Any redundant nodes in a voting tree are discarded, so all voting trees uncovered publicly should contain between 1 and $o$ nodes, where $o$ is the number of options in the vote.}
+        \label{fig:figure6}
+\end{figure}
 
 It was possible that a briber might ask a voter to create a vote tree with, for example, 513 edges - the absence of such a tree would leave the briber certain that the bribee did not do as requested. But if we remove these redundant nodes, then we prevent such a possibility.
 

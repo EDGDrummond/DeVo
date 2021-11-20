@@ -1,0 +1,18 @@
+\begin{tikzpicture}
+    [roundnode/.style={circle, draw=black, very thick},
+    squarednode/.style={rectangle, draw=black, very thick},]
+
+    %Nodes
+    \node[squarednode](Q){Q};
+    \node[squarednode](R)[right=of Q]{R};
+    \node[squarednode](S)[right=of R]{S};
+
+    \node[squarednode](Q')[below=of R]{Q'};
+    \node[squarednode](R')[below=of Q]{R'};
+    \node[squarednode](S')[below=of S]{S'};
+
+    %Lines
+    \draw[->](Q.south)--(Q'.north);
+    \draw[->](R.south)--(R'.north);
+    \draw[->](S.south)--(S'.north);
+\end{tikzpicture}

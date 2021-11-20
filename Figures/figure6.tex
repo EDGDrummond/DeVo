@@ -1,0 +1,35 @@
+\begin{tikzpicture}
+    [roundnode/.style={circle, draw=black, very thick},
+    squarednode/.style={rectangle, draw=black, very thick},]
+
+     %Nodes   
+    \node[squarednode](Q){$\overline{Q}$};
+    \node[squarednode](R)[right=of Q]{$\overline{R}$};
+    \node[squarednode](S)[right=of R]{$\overline{S}$};
+    \node[squarednode](T)[right=of S]{$\overline{T}$};
+    \node[squarednode](U)[right=of T]{$\overline{U}$};
+
+    \node(center-top)[below=0.1cm of S]{};
+    \node(center-bottom)[below=0.9cm of center-top] {};
+
+    \node[squarednode](Q2)[below left=0.5cm of center-bottom]{$\overline{Q}$};
+    \node[squarednode](U2)[below right=0.5cm of center-bottom]{$\overline{U}$};
+
+    \node(G1)[below=of Q2]{$g_1s_2s_3P$};
+    \node(G2)[below=of U2]{$g_2s_2s_3P$};
+
+    \node[squarednode](Q3)[below=5cm of Q]{$\overline{Q}$};
+    \node[roundnode](node)[right=of Q3]{$g_1s_2s_3P$};
+    \node[squarednode](U3)[right=of node]{$\overline{U}$};
+    \node[roundnode](node2)[right=of U3]{$g_2s_2s_3P$};
+
+    %Lines
+    \draw[double distance=1mm, -{Latex[length=0.3cm,open]}, line width=0.3mm] (center-top) to (center-bottom);
+    \draw [double distance=0.6mm, white, line width=0.2mm] (center-top) to ($(center-bottom)+(0,3.8mm)$);
+
+    \draw[->](Q2)--(G1);
+    \draw[->](U2)--(G2);
+
+    \draw[->](Q3)--(node);
+    \draw[->](U3)--(node2);
+\end{tikzpicture}

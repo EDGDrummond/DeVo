@@ -1,0 +1,24 @@
+\begin{tikzpicture}
+    [roundnode/.style={circle, draw=black, very thick},
+    squarednode/.style={rectangle, draw=black, very thick},]
+
+    %Nodes
+    \node[squarednode](L1){L};        
+    \node[squarednode](L2)[right=5cm of L1] {L'};
+
+    %Labels
+    \node(intialnode)[above=0.2cm of L1]{\underline{Initial Node}};
+    \node(shardednode)[above=0.2cm of L2]{\underline{Sharded Node}};
+
+    %Lines
+    \draw[->](L1)--node[above]{Sharding}++(L2);
+
+    %Equations
+    \node(L1equation)[below=0.5cm of L1]{$L=\{g_iP+r_{i,j}s_1P, r_{i,j}s_2P\}$};
+    \node(L2equation)[below=0.5cm of L2]{
+        $\begin{aligned}
+            L'=\{g_is_{2,k}s_{3,k}P+r_{i,j}s_1s_{2,k}s_{3,k}P,\\r_{i,j}s_{1,k}s_2s_{3,k}P\}
+        \end{aligned}$
+        };
+    
+\end{tikzpicture}
