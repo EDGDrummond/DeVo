@@ -14,10 +14,14 @@
     \draw[->](L1)--node[above]{Sharding}++(L2);
 
     %Equations
-    \node(L1equation)[below=0.5cm of L1]{$L=\{g_iP+r_{i,j}s_1P, r_{i,j}s_2P\}$};
+    \node(L1equation)[below=0.5cm of L1]{
+        $\begin{aligned}
+            L=\{(g_i+r_{i,j,1}s_1+r_{i,j,2})P, \\ r_{i,j,1}s_2P, \\ r_{i,j,2}s_2P\}
+        \end{aligned}$
+        };
     \node(L2equation)[below=0.5cm of L2]{
         $\begin{aligned}
-            L'=\{g_is_{2,k}s_{3,k}P+r_{i,j}s_1s_{2,k}s_{3,k}P,\\r_{i,j}s_{1,k}s_2s_{3,k}P\}
+            L'=\{(g_i+r_{i,j,1}s_1 + r_{i,j,2})s_{2,k}s_{3,k}P, \\r_{i,j,1}s_{1,k}s_2s_{3,k}P \\ r_{i,j,2}s_2s_{3,k}\}
         \end{aligned}$
         };
     

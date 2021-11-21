@@ -37,7 +37,7 @@ We will need to make use of a positive accumulator; this will serve as both a wh
 \subsection{Encryption schemes}
 The encryption schemes used here will be of a threshold type, a brief description of which can be found in the appendix.
 
-There will be three unique private keys, $s_1$, $s_2$ and $s_3$, shared among the MPC committee. These 3 secret keys will be used to create 2 public scalar points, $s_1P$ and $s_2P$, and 2 secret keys, $s_2s_3$ and $s_1s_3$ - after this the shards of the original public keys should be erased.
+There will be three unique private keys, $s_1$, $s_2$ and $s_3$, shared among the MPC committee. These 3 secret keys will be used to create 2 public scalar points, $s_1P$ and $s_2P$, and 3 secret keys, $s_2s_3$, $s_1s_3$ and $s_3$ - after this the shards of the original public keys, $s_1$ and $s_2$, should be erased.
 
 One point to elaborate on is that, if we have some other scalar $r$, we can create both $rs_1P$ and $rs_2P$, but we cannot create $rs_1s_2P$ without using the MPC committee. This will be relevant later, because the committee will generate $rs_1s_2s_3P$, but since no voter can generate it it will be impossible to link tallied votes to the voters who sent them.
 
@@ -68,12 +68,12 @@ When sending records, voters will prove both that they are eligible to vote, and
 When publishing this accumulator, O will also send a record to each eligible voter that contains their $g_i$ value (essentially encrypted communication).
 
 \subsection{Voting}
-We will refer to the thing being created by voters as `nodes`. This terminology is used because we can think of the voters as building a star shaped tree. In the center of the tree will be the voter's scalar $g_i$, and the voter adds nodes that `point` to the center - you can see this more clearly in figure \ref{fig:figure1}. In these nodes (which are published as records in the ZEXE model), the voter has to input several things:
+We will refer to the thing being created by voters as `nodes`. This terminology is used because we can think of the voters as building a star shaped tree. In the center of the tree will be the voter's scalar $g_i$, and the voter adds nodes that `point` to the center - you can see this more clearly in figure \ref{fig:figure1}. For each node created, the voter will produce 2 random scalars, $r_{i,j,1}$ and $r_{i,j,2}$; the $i$ represents the voter, and the $j$ represents which node is being referenced. In these nodes (which are published as records in the ZEXE model), the voter has to input several things:
 \begin{enumerate}
     \item A message saying this is a vote in vote X.
     \item A proof that they are eligible to vote, and that when they use $g_i$, it is the correct value (i.e. the one in the accumulator associated with their name).
-    \item A blinded reference to their unique value, $g_is_1P+r_{i,j}s_1P$.
-    \item A shielded reference to their blinding value, $r_{i,j}s_2P$. The MPC committee will later use this to determine $r_{i,j}s_1s_2s_3P$ and unshield the pointer ($r_{i,j}$ was a randomly generated scalar).
+    \item A double blinded reference to their unique value, $g_is_1P + r_{i,j,1}s_1P + r_{i,j,2}P$.
+    \item A shielded reference to their blinding values, $r_{i,j,1}s_2P$ and $r_{i,j,2}s_2P$. The MPC committee will later use these to determine $r_{i,j,1}s_1s_2s_3P$, $r_{i,j,2}s_2s_3P$, and unshield the pointer.
 \end{enumerate}
 
 \begin{figure}[h!]
@@ -97,12 +97,13 @@ When the vote is over, the MPC committee will batch the nodes into small enough 
 
 For each batch, the MPC member will do 3 things (and also produce a proof that these things were all done correctly). The MPC member will do something locally to each node, and they will also do something globally to the set of nodes in their batch - you can look at figure \ref{fig:figure3} for a visual of the local change, and at figure \ref{fig:figure4} for a visual of the global change:
 \begin{enumerate}
-    \item Apply their shard ($s_{2,k}s_{3,k}$) of $s_2s_3$ to $g_is_1P+r_{i,j}s_1P$.
-    \item Apply their shard ($s_{1,k}s_{3,k}$) of $s_1s_3$ to $r_{i,j}s_2P$.
+    \item Apply their shard ($s_{2,k}s_{3,k}$) of $s_2s_3$ to $g_is_1P+r_{i,j,1}s_1P + r_{i,j,2}P$.
+    \item Apply their shard ($s_{1,k}s_{3,k}$) of $s_1s_3$ to $r_{i,j,1}s_2P$.
+    \item Apply their shard ($s_{3,k}$) of $s_3$ to $r_{i,j,2}s_2P$.
     \begin{figure}[h!]
         \centering
         \input{Figures/figure3}
-        \caption{The MPC member will apply their shard $s_{2,k}s_{3,k}$ to the node being added, and their other shard $s_{1,k}s_{3,k}$ to the shielded blinding factor.}
+        \caption{The MPC member will apply their shard $s_{2,k}s_{3,k}$ to the node being added, their second shard $s_{1,k}s_{3,k}$ to the relevant shielded blinding factor, and their third shard $s_{3,k}$ to the other blinding factor.}
         \label{fig:figure3}
     \end{figure}
     \item Permute the batch, so that nobody will be able to see which pre-sharded node corresponds to which post-sharded vote.
@@ -116,10 +117,10 @@ For each batch, the MPC member will do 3 things (and also produce a proof that t
         \label{fig:figure4}
 \end{figure}
 
-Once the threshold MPC has been conducted, votes will be of the form
-$$ g_is_1s_2s_3P + r_{i,j}s_1s_2s_3P, \hspace{2mm}r_{i,j}s_1s_2s_3P. $$
+Once the threshold MPC has been conducted, nodes will be of the form
+$$ g_is_1s_2s_3P + r_{i,j,1}s_1s_2s_3P + r_{i,j,2}s_2s_3P, \hspace{2mm}r_{i,j,1}s_1s_2s_3P, \hspace{2mm} r_{i,j,2}s_2s_3P. $$
 
-Now we can subtract the two to get out $g_is_1s_2s_3P$. The previous values, $g_is_1P + r_{i,j}s_1P$ were all different, but the returned values from each node are the same if they are from the same voter. Figure \ref{fig:figure5} provides a visual of what will be visible to an MPC member when contributing their final shard, as they will be the ones to uncover nodes from the same voter in their batch.
+Now we can subtract the two to get out $g_is_1s_2s_3P$. The previous values, $g_is_1P + r_{i,j,1}s_1P + r_{i,j,2}P$ were all different, but the returned values from each node are the same if they are from the same voter. Figure \ref{fig:figure5} provides a visual of what will be visible to an MPC member when contributing their final shard, as they will be the ones to uncover nodes from the same voter in their batch.
 
 \begin{figure}[h!]
         \centering
