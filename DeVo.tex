@@ -9,7 +9,7 @@
 \title{Decentralised Voting}
 \author{Errol Drummond\\ \texttt{Aleo, Dock}\\ \and 
  Luke Pearson\\ \texttt{Polychain Capital} \and
- Thomas Norton}
+ Thomas Norton \\ Webb}
 \date{November 2021}
 
 \begin{document}
@@ -42,9 +42,9 @@ There will be three unique private keys, $s_1$, $s_2$ and $s_3$, shared among th
 One point to elaborate on is that, if we have some other scalar $r$, we can create both $rs_1P$ and $rs_2P$, but we cannot create $rs_1s_2P$ without using the MPC committee. This will be relevant later, because the committee will generate $rs_1s_2s_3P$, but since no voter can generate it it will be impossible to link tallied votes to the voters who sent them.
 
 \subsection{Vote representation}
-Votes will be determined in a graph theoretic way. Voters will be have some value $g_i$. Voters will send records that are only valid if they 'point' to their own value $g_i$ (by blinding $g_i$ with a random scalar, chosen differently with the creation of each record). 
+Votes will be determined in a graph theoretic way. Voters will be have some value $g_i$. Voters will send records that are only valid if they 'point' to their own value $g_i$ (by blinding $g_i$ with a couple random scalars, chosen differently with the creation of each record). 
 
-If there are $k$ vote options in the vote, then the voter's vote is determined by the number of records they have pointing to their $g_i$. If there are 3 options, and the number of records pointing at their $g_i$ is $m$, we have option 0 if $m\equiv0\bmod3$, option 1 if $m\equiv1\bmod3$ and option 2 if $m\equiv2\bmod3$.
+If there are $k$ vote options in the vote, then the voter's vote is determined by the number of records they have pointing to their $g_i$. If there are 3 options, and the number of records pointing at their $g_i$ is $m$, we have option 1 if $m\equiv1\bmod3$, option 2 if $m\equiv2\bmod3$, and option 0 if $m\equiv0\bmod3$.
 
 It is up to the users of this system to decide whether they want to include a `null` vote option to signal discontent.
 
@@ -52,9 +52,7 @@ It is up to the users of this system to decide whether they want to include a `n
 \subsection{One-time setup}
 There is a need for encryption/decryption keys to be shared among sets of nodes; this is where we are decentralising the role of the trusted central party.
 
-The nodes who will be sharing the keys will run a non-interactive distributed key generation and key resharing protocol \href{https://eprint.iacr.org/2021/339.pdf}{Groth}, but possibly \href{https://eprint.iacr.org/2021/1397.pdf}{GHL} could be useful too). All nodes that are going to be involved will run an MPC wherein the encryption/decryption keys are generated, and the relevant keys sharded and shared among the nodes.
-
-Note: Perhaps it will be necessary to have O run this initial setup to prevent too many undesired parties from getting involved and learning shards of the decryption key. This aspect requires more thought.
+The nodes who will be sharing the keys will run a non-interactive distributed key generation and key resharing protocol such as  \href{https://eprint.iacr.org/2021/339.pdf}{Groth} or \href{https://eprint.iacr.org/2021/1397.pdf}{GHL}. All nodes that are going to be involved will run an MPC wherein the encryption/decryption keys are generated, and the relevant keys sharded and shared among the nodes.
 
 \subsection{Setup}
 O will publish a whitelist accumulator of eligible voters. Elements of this whitelist contain two things:
@@ -63,16 +61,18 @@ O will publish a whitelist accumulator of eligible voters. Elements of this whit
     \item Some random scalar $g_i$ that is unique to the voter.
 \end{enumerate}
 
-When sending records, voters will prove both that they are eligible to vote, and that their vote 'points' (to be explained more clearly later) to their $g_i$ value.
+When sending records, voters will prove both that they are eligible to vote, and that their vote 'points' to their $g_i$ value.
 
-When publishing this accumulator, O will also send a record to each eligible voter that contains their $g_i$ value (essentially encrypted communication).
+When publishing this accumulator, O will also send a record to each eligible voter that contains their $g_i$ value (essentially encrypted communication); alternatively, eligible voters could send the accumulator their $g_i$ value directly.
+
+Alternatively, the accumulator of valid voters could also be maintained in a more decentralised manner, such as having a specific set of rules for allowing public keys to be added or removed.
 
 \subsection{Voting}
-We will refer to the thing being created by voters as `nodes`. This terminology is used because we can think of the voters as building a star shaped tree. In the center of the tree will be the voter's scalar $g_i$, and the voter adds nodes that `point` to the center - you can see this more clearly in figure \ref{fig:figure1}. For each node created, the voter will produce 2 random scalars, $r_{i,j,1}$ and $r_{i,j,2}$; the $i$ represents the voter, and the $j$ represents which node is being referenced. In these nodes (which are published as records in the ZEXE model), the voter has to input several things:
+We will refer to the thing being created by voters as `nodes'. This terminology is used because we can think of the voters as building a star shaped tree. In the center of the tree will be the voter's scalar $g_i$, and the voter adds nodes that `point' to the center - you can see this more clearly in figure \ref{fig:figure1}. For each node created, the voter will produce 2 random scalars, $r_{i,j,1}$ and $r_{i,j,2}$; the $i$ represents the voter, and the $j$ represents which node is being referenced. In these nodes (which are published as records in the ZEXE model), the voter has to input several things:
 \begin{enumerate}
     \item A message saying this is a vote in vote X.
     \item A proof that they are eligible to vote, and that when they use $g_i$, it is the correct value (i.e. the one in the accumulator associated with their name).
-    \item A double blinded reference to their unique value, $g_is_1P + r_{i,j,1}s_1P + r_{i,j,2}P$.
+    \item A double blinded reference to their unique value, $g_iP + r_{i,j,1}s_1P + r_{i,j,2}P$.
     \item A shielded reference to their blinding values, $r_{i,j,1}s_2P$ and $r_{i,j,2}s_2P$. The MPC committee will later use these to determine $r_{i,j,1}s_1s_2s_3P$, $r_{i,j,2}s_2s_3P$, and unshield the pointer.
 \end{enumerate}
 
@@ -97,7 +97,7 @@ When the vote is over, the MPC committee will batch the nodes into small enough 
 
 For each batch, the MPC member will do 3 things (and also produce a proof that these things were all done correctly). The MPC member will do something locally to each node, and they will also do something globally to the set of nodes in their batch - you can look at figure \ref{fig:figure3} for a visual of the local change, and at figure \ref{fig:figure4} for a visual of the global change:
 \begin{enumerate}
-    \item Apply their shard ($s_{2,k}s_{3,k}$) of $s_2s_3$ to $g_is_1P+r_{i,j,1}s_1P + r_{i,j,2}P$.
+    \item Apply their shard ($s_{2,k}s_{3,k}$) of $s_2s_3$ to $g_iP+r_{i,j,1}s_1P + r_{i,j,2}P$.
     \item Apply their shard ($s_{1,k}s_{3,k}$) of $s_1s_3$ to $r_{i,j,1}s_2P$.
     \item Apply their shard ($s_{3,k}$) of $s_3$ to $r_{i,j,2}s_2P$.
     \begin{figure}[h!]
@@ -118,9 +118,9 @@ For each batch, the MPC member will do 3 things (and also produce a proof that t
 \end{figure}
 
 Once the threshold MPC has been conducted, nodes will be of the form
-$$ g_is_1s_2s_3P + r_{i,j,1}s_1s_2s_3P + r_{i,j,2}s_2s_3P, \hspace{2mm}r_{i,j,1}s_1s_2s_3P, \hspace{2mm} r_{i,j,2}s_2s_3P. $$
+$$ g_is_2s_3P + r_{i,j,1}s_1s_2s_3P + r_{i,j,2}s_2s_3P, \hspace{2mm}r_{i,j,1}s_1s_2s_3P, \hspace{2mm} r_{i,j,2}s_2s_3P. $$
 
-Now we can subtract the two to get out $g_is_1s_2s_3P$. The previous values, $g_is_1P + r_{i,j,1}s_1P + r_{i,j,2}P$ were all different, but the returned values from each node are the same if they are from the same voter. Figure \ref{fig:figure5} provides a visual of what will be visible to an MPC member when contributing their final shard, as they will be the ones to uncover nodes from the same voter in their batch.
+Now we can subtract the two to get out $g_is_2s_3P$. The previous values, $g_iP + r_{i,j,1}s_1P + r_{i,j,2}P$ were all different, but the returned values from each node are the same if they are from the same voter. Figure \ref{fig:figure5} provides a visual of what will be visible to an MPC member when contributing their final shard, as they will be the ones to uncover nodes from the same voter in their batch.
 
 \begin{figure}[h!]
         \centering
@@ -140,7 +140,7 @@ For example, if there are 2 vote options, then if a vote subtree that they see h
         \label{fig:figure6}
 \end{figure}
 
-It was possible that a briber might ask a voter to create a vote tree with, for example, 513 edges - the absence of such a tree would leave the briber certain that the bribee did not do as requested. But if we remove these redundant nodes, then we prevent such a possibility.
+It was possible that a briber might ask a voter to create a vote tree with, for example, 513 edges - the absence of such a tree would leave the briber certain that the bribee did not do as requested. But if we remove these redundant nodes, then we prevent such a possibility. The only way to know the full trees at the end of the MPC would be to bribe every single member who took part in the MPC, a highly unrealistic possibility.
 
 The post-MPC trees will now be visible (and they will have the same valency modulo the number of voter options), and due to the permutation, it will not be possible to see which post-MPC votes correspond to which pre-MPC votes. Moreover, due to the multiplication by the secret keys $s_1$ and $s_2$, nobody can determine any connections to entries in the accumulator either.
 
@@ -167,7 +167,7 @@ In its traditional form, collusion resistance means that voters are unable to pr
 
 We take a different approach to collusion resistance: rather than preventing voters from revealing their true vote, we provide them with the means to reveal \emph{any} vote.  By analogy to traditional polling locations, our system is akin to one in which voters leave the booth with receipts stating that they voted for each of the candidates.  The voter can then present the appropriate receipt to the corrupt third party and collect the bribe regardless of the actual vote they cast.  Of course, because it is common knowledge that voters have the means to prove any outcome they wish, the proof becomes meaningless and third parties do not try to bribe voters to begin with.  
 
-This plays out in our system as follows: suppose that in a vote between $N$ candidates $C_0, C_1, \ldots C_{N-1}$ Alice wishes to vote for candidate $C_k$.  Recall that in the final tally, all of Alice's ballots will be counted and their number modulo $N$ will determine which candidate receives Alice's vote. So Alice could vote for $C_k$ simply by submitting $k$ ballots.  Now suppose that Alice has received an offer from Bob: 1 BTC if she votes for candidate $C_0$. Alice wishes to collect the 1 BTC from Bob and still vote for $C_k$ as she originally intended. Rather than submitting $k$ ballots, Alice submits $N+k$ ballots (or $2N+k$, or $3N+k$, etc.).  Each of Alice's ballots has the form $(g_A s_1 P + r_{A,j} s_1 P, r_{A,j} s_2 P)$ for $j=1,2, \ldots N+k$. Bob sees all ballots cast by all voters, but due to their shielded form he cannot identify Alice's votes from among them.  Alice may, however, reveal any of her ballots to Bob by sharing with him the randomly generated number $r_{A,j}$ with which she shielded the ballot.  Bob then computes $r_{A,j} s_2 P$ and is convinced that Alice did indeed cast the given ballot because otherwise she would have had to solve a discrete logarithm problem to determine $r_{A,j}$ from the publicly visible EC point $r_{A,j}s_2 P$.  Bob now computes $r_{A,j} s_1 P$ and subtracts it from $g_A s_1 P + r_{A,j} s_1 P$ to see the curve point $g_A s_1 P$.  If Alice reveals multiple votes to Bob, all will contain the same point $g_A s_1 P$, further convincing Bob that Alice has honestly revealed her votes to him.  
+This plays out in our system as follows: suppose that in a vote between $N$ candidates $C_0, C_1, \ldots C_{N-1}$ Alice wishes to vote for candidate $C_k$.  Recall that in the final tally, all of Alice's ballots will be counted and their number modulo $N$ will determine which candidate receives Alice's vote. So Alice could vote for $C_k$ simply by submitting $k$ ballots.  Now suppose that Alice has received an offer from Bob: 1 BTC if she votes for candidate $C_0$. Alice wishes to collect the 1 BTC from Bob and still vote for $C_k$ as she originally intended. Rather than submitting $k$ ballots, Alice submits $N+k$ ballots (or $2N+k$, or $3N+k$, etc.).  Each of Alice's ballots has the form $(g_A  P + r_{A,j,1} s_1 P, r_{A,j,1} s_2 P, r_{A,j,2}s_2P)$ for $j=1,2, \ldots N+k$. Bob sees all ballots cast by all voters, but due to their shielded form he cannot identify Alice's votes from among them.  Alice may, however, reveal any of her ballots to Bob by sharing with him a randomly generated number pair $r_{A,j,1}, r_{A,j,2}$ with which she shielded the ballot.  Bob then computes $r_{A,j,1} s_2 P$ and is convinced that Alice did indeed cast the given ballot because otherwise she would have had to solve a discrete logarithm problem to determine $r_{A,j,1}$ from the publicly visible EC point $r_{A,j,1}s_2 P$.  Bob now computes $r_{A,j,a} s_1 P$ and $r_{A,j,2}P$, and subtracts them from $g_A P + r_{A,j,1} s_1 P + r_{A,j,2}P$ to see the curve point $g_A P$.  If Alice reveals multiple votes to Bob, all will contain the same point $g_A P$, further convincing Bob that Alice has honestly revealed her votes to him.  
 
 The crucial observation is that Alice may reveal \emph{as many of her votes} to Bob as she wishes, but he will have no way of knowing whether she has revealed \emph{all of her votes.}  So to prove to Bob that she voted for candidate $C_0$, Alice reveals $N$ of her ballots, leaving the remaining $k$ ballots shielded.  The DLP makes it impractical for Bob to try to unshield other ballots to see whether Alice left any hidden from him.  Bob realizes the futility of trying to bribe Alice and so he never tries in the first place.
 
@@ -185,6 +185,7 @@ Let's say that there are $b$ batches, each with $d$ nodes. Each MPC member, when
 \begin{itemize}
     \item They applied their shard of $s_1s_3$ correctly (using the same shard each time)
     \item They applied their shard of $s_2s_3$ correctly (using the same shard each time)
+    \item They applied their shard of $s_2s_3$ correctly (using the same shard each time)
     \item They permuted their batch of votes
 \end{itemize}
 
@@ -192,7 +193,7 @@ The EC multiplication cost is of course linear in $d$ (with windowed multiplicat
 
 This needs more thinking about what happens in which fields and where the constraint numbers should come from. If voters need to prove that they encrypted their vote correctly, then maybe the proofs of the MPC members will need to be on a chained curve?
 
-Let's say we use the 2-chain BLS12-377 and BW6-761 (the scalar field of the latter is the base field of the former), then the EC points that are output as nodes by voters should consist of 377 bits. Each EC multiplication should be possible in around 3 constraints per bit (ACTUALLY THIS PROBABLY ISN'T TRUE BECAUSE WE DON'T HAVE A FIXED BASE; ASSUME NAIVE DOUBLE AND ADD METHOD YIELDING 5 CONSTRAINTS/BIT OR MAYBE MORE - MORE THOUGHT NEEDED), yielding around 1131 constraints; and therefore around 2262 constraints for multiplication per voter node. Note that multiplication requires a binary decomposition for the multiplying scalar, but since we only use 2 scalars for multiplying ($s_1$ and $s_2$), this cost is amortised.
+Let's say we use the 2-chain BLS12-377 and BW6-761 (the scalar field of the latter is the base field of the former), then the EC points that are output as nodes by voters should consist of 377 bits. Each EC multiplication should be possible in around 3 constraints per bit, yielding around 1131 constraints; and therefore around 2262 constraints for multiplication per voter node. Note that multiplication requires a binary decomposition for the multiplying scalar, but since we only use 2 scalars for multiplying ($s_1$ and $s_2$), this cost is amortised.
 
 This yields a rough cost per committee member of
 $$ 2262*d + 2d\log_2(d) - d = 2263d + 2d\log_2(d)
