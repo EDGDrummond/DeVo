@@ -9,7 +9,7 @@
 \title{Decentralised Voting}
 \author{Errol Drummond\\ \texttt{Aleo, Dock}\\ \and 
  Luke Pearson\\ \texttt{Polychain Capital} \and
- Thomas Norton \\ Webb}
+ Thomas Norton \\ \texttt{Webb}}
 \date{November 2021}
 
 \begin{document}
@@ -95,15 +95,17 @@ Due to the private nature of the ZEXE design, it will be impossible to see who i
 \subsection{Vote tallying}
 When the vote is over, the MPC committee will batch the nodes into small enough batches such that it will be computationally feasible to conduct the MPC.
 
-For each batch, the MPC member will do 3 things (and also produce a proof that these things were all done correctly). The MPC member will do something locally to each node, and they will also do something globally to the set of nodes in their batch - you can look at figure \ref{fig:figure3} for a visual of the local change, and at figure \ref{fig:figure4} for a visual of the global change:
+For each batch, the MPC member will do 3 things (and also produce a proof that these things were all done correctly). The MPC member will do something locally to each node, and they will also do something globally to the set of nodes in their batch - you can look at figure \ref{fig:figure3} for a visual of the local change, and at figure \ref{fig:figure4} for a visual of the global change.
+
+For each vote, we also need the MPC members to create and use a random scalar. Without this scalar, it will be possible to brute force search pairings and link pre-tallied votes to their tallied vote, and thus create receipts. For security reasons, it makes sense to have the MPC members derive this randomness from their secret key and some other data to ensure the scalar truly is random and known only to that MPC member. Call this new randomness $k_j$, where $j$ represents that the scalar corresponds to the MPC member and not the voter ($k_j$ should be deleted at the end of the MPC, it is a form of toxic waste). Let $k:=\prod_{j=1}^{m}k_j$; then we have:
 \begin{enumerate}
-    \item Apply their shard ($s_{2,k}s_{3,k}$) of $s_2s_3$ to $g_iP+r_{i,j,1}s_1P + r_{i,j,2}P$.
-    \item Apply their shard ($s_{1,k}s_{3,k}$) of $s_1s_3$ to $r_{i,j,1}s_2P$.
-    \item Apply their shard ($s_{3,k}$) of $s_3$ to $r_{i,j,2}s_2P$.
+    \item Apply their randomness $k_j$ and their shard ($s_{2,k}s_{3,k}$) of $s_2s_3$ to $g_iP+r_{i,j,1}s_1P + r_{i,j,2}P$.
+    \item Apply their randomness $k_j$ and their shard ($s_{1,k}s_{3,k}$) of $s_1s_3$ to $r_{i,j,1}s_2P$.
+    \item Apply their randomness $k_j$ and their shard ($s_{3,k}$) of $s_3$ to $r_{i,j,2}s_2P$.
     \begin{figure}[h!]
         \centering
         \input{Figures/figure3}
-        \caption{The MPC member will apply their shard $s_{2,k}s_{3,k}$ to the node being added, their second shard $s_{1,k}s_{3,k}$ to the relevant shielded blinding factor, and their third shard $s_{3,k}$ to the other blinding factor.}
+        \caption{The MPC member will apply their shard  $s_{2,k}s_{3,k}$ to the node being added, their second shard $s_{1,k}s_{3,k}$ to the relevant shielded blinding factor, their third shard $s_{3,k}$ to the other blinding factor, and their shard $k_j$ to everything.}
         \label{fig:figure3}
     \end{figure}
     \item Permute the batch, so that nobody will be able to see which pre-sharded node corresponds to which post-sharded vote.
@@ -118,9 +120,9 @@ For each batch, the MPC member will do 3 things (and also produce a proof that t
 \end{figure}
 
 Once the threshold MPC has been conducted, nodes will be of the form
-$$ g_is_2s_3P + r_{i,j,1}s_1s_2s_3P + r_{i,j,2}s_2s_3P, \hspace{2mm}r_{i,j,1}s_1s_2s_3P, \hspace{2mm} r_{i,j,2}s_2s_3P. $$
+$$ g_iks_2s_3P + r_{i,j,1}ks_1s_2s_3P + r_{i,j,2}ks_2s_3P, \hspace{2mm}r_{i,j,1}ks_1s_2s_3P, \hspace{2mm} r_{i,j,2}ks_2s_3P. $$
 
-Now we can subtract the two to get out $g_is_2s_3P$. The previous values, $g_iP + r_{i,j,1}s_1P + r_{i,j,2}P$ were all different, but the returned values from each node are the same if they are from the same voter. Figure \ref{fig:figure5} provides a visual of what will be visible to an MPC member when contributing their final shard, as they will be the ones to uncover nodes from the same voter in their batch.
+Now we can subtract the two to get out $g_iks_2s_3P$. The previous values, $g_iP + r_{i,j,1}s_1P + r_{i,j,2}P$ were all different, but the returned values from each node are the same if they are from the same voter. Figure \ref{fig:figure5} provides a visual of what will be visible to an MPC member when contributing their final shard, as they will be the ones to uncover nodes from the same voter in their batch.
 
 \begin{figure}[h!]
         \centering
@@ -218,7 +220,7 @@ There are a few things in this that require more thought/work. Ideas from anybod
     \item Which accumulator schemes would make sense to use with this system
     \item Discussion of the issue of selling a private key. Perhaps there is a way to remove the possibility of determining a vote even with the private key; maybe this could be done via nullifiers and sending records to the vote tallying public key?
     \item It is important to consider in more detail how MPC committee members will be selected and the committee updated. It would be unwise to have the organisation create and share the key, but how committee members will be selected is of importance (though fortunately even if they are corrupt the worst case scenario is that they will be able to see how people voted - they will not be able to create votes)
-    \item Should add the possibility for turning the vote into nothing too (i.e. add an option that is a null vote)
+    \item Work discussing how this scheme can be used for various types of voting, such as token based, quadratic, etc. There seem to be some ways to proceed to make it work in different settings. For example, in a 1 token 1 vote setting we can have voters add leaves to a Merkle tree where the leaves contain data about the public key and unspent records; the $g_i$ created can be given an order that relates to the weighting of the vote, e.g. so $\text{ord}(g_i) = 100$ would mean that vote was worth 100. By standardising the size of possible votes, we should maintain all the properties we want.
 \end{enumerate}
 
 \section{Potential problems}
@@ -227,7 +229,7 @@ Sybil attack. Perhaps something that will help reduce this is the inclusion of P
 If the MPC committee work together they can also determine which original vote a Sybil attack came from. The committee can decide to try to uncover this if they wish for slashing purposes. However the committee will not know the identity of the voter, they will only be able to see some of the voting records. Providing this information to O will allow O to determine their identity.
 
 \section{Acknowledgements}
-We would like to say a big thanks to Kobi Gurkan for providing thoughts and pointing out weaknesses in several iterations of this design. A thanks also to Pratyush Mishra for helping understand some of the computational limitations to the design that led to many simplifications being discovered.
+We would like to say a big thanks to Kobi Gurkan for providing thoughts and pointing out weaknesses in several iterations of this design. A thanks also to Pratyush Mishra for helping understand some of the computational limitations to the design that led to many simplifications being discovered. A final thanks to Yoav Eshel for the diagrams.
 
 \section{Appendix}
 \subsection{Threshold encryption}
